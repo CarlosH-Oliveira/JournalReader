@@ -33,3 +33,7 @@ A proteção antifalsificação permanece ativa em ambas as rotas. O aplicativo 
 ## Validação
 
 Verificar build .NET e Node, importação real acima de 4,5 MB, prévia, confirmação e leitor. Confirmar disponibilidade do mesmo acervo em outro deployment para comprovar persistência fora do contêiner. Não confundir HTTP 200 da página inicial com validação do fluxo de importação.
+
+### Evidência de 26/10/2026
+
+O EPUB fornecido (13.594.113 bytes) atravessou o fluxo de upload direto e gerou prévia com 2.459.219 caracteres. Após confirmação, o leitor abriu em quatro colunas, com 1.090 folhas na viewport do teste. O mesmo livro foi aberto em outro deployment e o comando de posição retornou “Salvo no acervo”. A retomada após recarregar também foi verificada. A quantidade de folhas depende de fonte, viewport e modo acessível.

@@ -2,7 +2,7 @@
 
 Aplicação pessoal em **ASP.NET Core 8 MVC + Razor**, organizada em **Clean Architecture**, baseada no planejamento das etapas 1 a 6 fornecido pelo solicitante. Comentários e documentação estão em português.
 
-**Estado da entrega:** código-fonte para revisão, compilação, testes e implantação pelo destinatário. O SDK .NET não estava disponível no ambiente de autoria; o acesso à rede impediu instalá-lo. Portanto, **não foram executados restore, build, testes .NET ou validação em navegador**. Foi verificada a sintaxe dos arquivos JavaScript com `node --check` e a estrutura XML dos projetos. Não considere esta entrega homologada para produção.
+**Estado da entrega:** compilação `dotnet publish` validada na Vercel. Em 26/10/2026, foi testada a importação do EPUB anexado de 13.594.113 bytes, com 2.459.219 caracteres extraídos e abertura no leitor em quatro colunas (1.090 folhas na viewport do teste). Também foram verificados persistência do acervo em outro deployment e salvamento de posição. Isso não substitui a execução integral do roteiro de testes. Consulte [a configuração e os limites da Vercel](docs/VERCEL.md).
 
 ## Requisitos e execução
 
