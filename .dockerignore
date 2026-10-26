@@ -3,3 +3,7 @@
 **/App_Data/
 .git/
 planejamento/
+
+node_modules
+.vercel
+.env*
