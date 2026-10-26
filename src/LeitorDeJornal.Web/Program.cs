@@ -14,7 +14,10 @@ builder.Services.AddControllersWithViews(options => options.Filters.Add(new Auto
 var blobEnabled = !string.IsNullOrWhiteSpace(builder.Configuration["BlobBridge:Url"]);
 if (blobEnabled)
 {
-    var bridge = new BlobBridge(builder.Configuration["BlobBridge:Url"]!, builder.Configuration["BlobBridge:Secret"]!);
+    IHttpContextAccessor accessor = new HttpContextAccessor();
+    builder.Services.AddSingleton(accessor);
+    var bridge = new BlobBridge(builder.Configuration["BlobBridge:Url"]!, builder.Configuration["BlobBridge:Secret"]!,
+        () => accessor.HttpContext?.Request.Headers["x-vercel-oidc-token"].ToString());
     builder.Services.AddSingleton(bridge);
     builder.Services.AddDataProtection().SetApplicationName("JournalReader");
     builder.Services.Configure<KeyManagementOptions>(o => o.XmlRepository = new BlobKeyRepository(bridge));

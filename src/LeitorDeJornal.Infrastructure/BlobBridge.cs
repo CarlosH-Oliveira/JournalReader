@@ -9,9 +9,9 @@ namespace LeitorDeJornal.Infrastructure;
 public sealed class BlobBridge : IDisposable
 {
     private readonly HttpClient client;
-    public BlobBridge(string url, string secret)
+    public BlobBridge(string url, string secret, Func<string?>? oidcToken = null)
     {
-        client = new HttpClient { BaseAddress = new Uri(url), Timeout = TimeSpan.FromMinutes(4) };
+        client = new HttpClient(new OidcHandler(oidcToken)) { BaseAddress = new Uri(url), Timeout = TimeSpan.FromMinutes(4) };
         client.DefaultRequestHeaders.Add("X-Internal-Secret", secret);
     }
     public Task<HttpResponseMessage> ReadAsync(string path, CancellationToken ct = default) =>
@@ -38,6 +38,15 @@ public sealed class BlobBridge : IDisposable
     }
     public async Task<string[]> KeysAsync() => await client.GetFromJsonAsync<string[]>("/keys") ?? [];
     public void Dispose() => client.Dispose();
+    private sealed class OidcHandler(Func<string?>? provider) : DelegatingHandler(new HttpClientHandler())
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
+        {
+            var token = provider?.Invoke();
+            if (!string.IsNullOrWhiteSpace(token)) request.Headers.TryAddWithoutValidation("x-vercel-oidc-token", token);
+            return base.SendAsync(request, ct);
+        }
+    }
 }
 
 /// <summary>Acervo privado com controle otimista via ETag entre instâncias.</summary>
