@@ -10,6 +10,7 @@ WORKDIR /app
 COPY --from=build /out ./
 ENV ASPNETCORE_HTTP_PORTS=80
 ENV ASPNETCORE_ENVIRONMENT=Production
+ENV AllowedHosts="localhost;127.0.0.1;*.vercel.app"
 ENV Storage__Directory=/tmp/journalreader
 EXPOSE 80
 ENTRYPOINT ["dotnet", "LeitorDeJornal.Web.dll"]
