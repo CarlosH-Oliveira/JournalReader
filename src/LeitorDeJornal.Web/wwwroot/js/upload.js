@@ -18,7 +18,7 @@ for (const form of document.querySelectorAll('[data-direct-upload="true"]')) {
             if (!response.ok) throw new Error('Não foi possível autorizar o envio. Recarregue a página e tente novamente.');
             const ticket = await response.json();
             const uploadUrl = new URL(ticket.uploadUrl);
-            if (uploadUrl.protocol !== 'https:' || !(uploadUrl.hostname === 'blob.vercel-storage.com' || uploadUrl.hostname.endsWith('.blob.vercel-storage.com'))) throw new Error('Endereço de envio inválido.');
+            if (uploadUrl.protocol !== 'https:' || !(uploadUrl.hostname === 'vercel.com' && uploadUrl.pathname.startsWith('/api/blob/'))) throw new Error('Endereço de envio inválido.');
             status.textContent = 'Enviando arquivo diretamente ao armazenamento privado…';
             await new Promise((resolve, reject) => {
                 const xhr = new XMLHttpRequest();

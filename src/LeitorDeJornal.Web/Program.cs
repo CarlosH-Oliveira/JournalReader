@@ -41,7 +41,7 @@ app.Use(async (context, next) =>
     context.Response.Headers["X-Content-Type-Options"] = "nosniff";
     context.Response.Headers["X-Frame-Options"] = "DENY";
     context.Response.Headers["Referrer-Policy"] = "same-origin";
-    context.Response.Headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://*.blob.vercel-storage.com https://blob.vercel-storage.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'";
+    context.Response.Headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://vercel.com/api/blob/; frame-ancestors 'none'; base-uri 'self'; form-action 'self'";
     // Textos pessoais e backups não devem ficar no cache de um proxy compartilhado.
     context.Response.Headers.CacheControl = "no-store";
     await next();
