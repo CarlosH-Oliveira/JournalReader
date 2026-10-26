@@ -1,0 +1,12 @@
+services:
+  leitor:
+    build: .
+    ports:
+      - "127.0.0.1:5080:8080"
+    volumes:
+      - leitor-dados:/app/data
+    environment:
+      AllowedHosts: "localhost;127.0.0.1"
+    restart: unless-stopped
+volumes:
+  leitor-dados:

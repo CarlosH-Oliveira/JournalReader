@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../LeitorDeJornal.Domain/LeitorDeJornal.Domain.csproj"/>
+  </ItemGroup>
+</Project>

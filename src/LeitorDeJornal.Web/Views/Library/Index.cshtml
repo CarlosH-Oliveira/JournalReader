@@ -1,0 +1,38 @@
+@model LibraryViewModel
+@{ ViewData["Title"] = "Meu acervo"; }
+<div class="eyebrow">SUA BIBLIOTECA PESSOAL</div>
+<div class="page-heading"><div><h1>Boas leituras começam aqui.</h1><p>Seus livros e documentos, no ritmo de um jornal.</p></div><span class="edition">EDIÇÃO PESSOAL<br /><strong>@DateTime.Today.ToString("dd.MM.yyyy")</strong></span></div>
+<div class="rule"></div>
+<div class="stats"><span><strong>@Model.Books.Count</strong> obras nesta seleção</span><span><strong>@Model.Books.Count(b => b.Position > 0)</strong> leituras iniciadas</span><span>TXT <span aria-hidden="true">/</span> PDF <span aria-hidden="true">/</span> EPUB</span></div>
+<section class="library-section" aria-labelledby="library-title">
+<div class="section-heading"><h2 id="library-title">Meu acervo</h2><a asp-controller="Import" asp-action="Index">Adicionar uma leitura <span aria-hidden="true">↗</span></a></div>
+<form method="get" class="filters">
+    <label class="search-field"><span class="sr-only">Buscar título no acervo</span><input type="search" name="q" value="@Model.Query" placeholder="Buscar no seu acervo…" maxlength="200" /></label>
+    <label><span class="sr-only">Formato</span><select name="format"><option value="">Todos os formatos</option><option selected="@(Model.Format == "TXT")">TXT</option><option selected="@(Model.Format == "PDF")">PDF</option><option selected="@(Model.Format == "EPUB")">EPUB</option></select></label>
+    <label><span class="sr-only">Ordenação</span><select name="sort"><option value="recent">Mais recentes</option><option value="title" selected="@(Model.Sort == "title")">Título A–Z</option><option value="oldest" selected="@(Model.Sort == "oldest")">Importados primeiro</option></select></label>
+    <button class="button" type="submit">Filtrar</button>
+</form>
+@if (Model.Books.Count == 0)
+{
+    <div class="empty-state"><span class="empty-icon" aria-hidden="true">▤</span><div class="eyebrow">ESPAÇO PARA NOVAS HISTÓRIAS</div><h2>@(string.IsNullOrWhiteSpace(Model.Query) && string.IsNullOrWhiteSpace(Model.Format) ? "Sua próxima leitura mora aqui." : "Nenhuma obra nesta seleção.")</h2><p>Importe um livro ou documento e descubra a leitura em quatro colunas.<br />O conteúdo é seu. A experiência é de jornal.</p><a class="button primary" asp-controller="Import" asp-action="Index">+ Importar minha primeira obra</a><a class="subtle" asp-controller="Library" asp-action="Index">Limpar filtros</a></div>
+}
+else
+{
+<div class="book-grid">
+@foreach (var book in Model.Books)
+{
+    var progress = book.Characters == 0 ? 0 : Math.Min(100, (int)(100.0 * book.Position / book.Characters));
+    <article class="book-card">
+        <a class="book-cover cover-@book.Format.ToLowerInvariant()" asp-controller="Reader" asp-action="Index" asp-route-id="@book.Id" tabindex="-1" aria-hidden="true"><span class="cover-top">BIBLIOTECA PESSOAL <b>@book.Format</b></span><span class="cover-title">@book.Title</span><span class="cover-bottom">LEITOR DE JORNAL <span>✦</span></span></a>
+        <div class="book-meta"><span class="badge">@book.Format</span><span>@book.ImportedAt.ToString("dd MMM yyyy")</span></div>
+        <h3><a asp-controller="Reader" asp-action="Index" asp-route-id="@book.Id">@book.Title</a></h3>
+        <div class="progress-label"><span>@(book.Position > 0 ? "Leitura em andamento" : "Pronto para começar")</span><span>@progress%</span></div>
+        <progress max="100" value="@progress" aria-label="Progresso da leitura"></progress>
+        <div class="card-actions"><a asp-controller="Reader" asp-action="Index" asp-route-id="@book.Id">@(book.Position > 0 ? "Continuar leitura" : "Começar leitura") <span aria-hidden="true">→</span></a><button type="button" class="icon-button" data-open-dialog="delete-@book.Id" aria-label="Excluir @book.Title">×</button></div>
+        <dialog id="delete-@book.Id"><h2>Excluir esta obra?</h2><p><strong>@book.Title</strong> e suas @book.Annotations marcações serão removidas. O arquivo original não será apagado.</p><form asp-action="Delete" method="post"><input type="hidden" name="id" value="@book.Id" /><div class="actions"><button class="button" type="button" data-close-dialog>Cancelar</button><button class="button danger" type="submit">Excluir obra e marcações</button></div></form></dialog>
+    </article>
+}
+</div>
+}
+</section>
+<div class="editorial-note"><span aria-hidden="true">✦</span><div><h3>Menos distrações. Mais leitura.</h3><p>Quatro colunas, texto preservado e um lugar para suas ideias. Importe, ajuste a página e siga no seu tempo.</p></div></div>

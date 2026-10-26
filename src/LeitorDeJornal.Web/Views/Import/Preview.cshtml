@@ -1,0 +1,9 @@
+@model ImportDraft
+@{ ViewData["Title"] = "Conferir importação"; }
+<div class="eyebrow">PRÉVIA DA IMPORTAÇÃO · @Model.Format</div><h1>Confira antes de começar.</h1><p class="lead">Leia a sequência extraída. O acervo só será alterado depois da sua confirmação.</p>
+<div asp-validation-summary="All" class="validation" role="alert"></div>
+@if (Model.Warnings.Count > 0) { <div class="notice warning"><strong>Atenção à extração</strong><ul>@foreach (var warning in Model.Warnings) { <li>@warning</li> }</ul></div> }
+<div class="two-panel preview-layout"><section class="panel"><h2>Texto extraído <small>@Model.Text.Length.ToString("N0") caracteres</small></h2><div class="text-preview" tabindex="0">@Model.Text</div></section>
+<aside class="panel"><h2>Adicionar ao acervo</h2><form asp-action="Confirm" method="post"><input type="hidden" name="Token" value="@Model.Token" /><label class="field">Título da obra<input name="Title" value="@Model.Title" required maxlength="200" /></label>
+@if (Model.Warnings.Count > 0) { <label class="checkbox"><input type="checkbox" name="Accepted" value="true" required /> Conferi a prévia e aceito os alertas de extração.</label> }
+<button class="button primary" type="submit">Confirmar e abrir leitor →</button></form><form asp-action="Cancel" method="post" class="cancel-form"><input type="hidden" name="token" value="@Model.Token" /><button class="button" type="submit">Cancelar importação</button></form><p class="hint">A prévia expira em 15 minutos. Textos já presentes no acervo não são duplicados.</p></aside></div>

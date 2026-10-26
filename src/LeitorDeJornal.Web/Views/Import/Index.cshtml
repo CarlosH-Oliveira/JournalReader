@@ -1,0 +1,9 @@
+@{ ViewData["Title"] = "Importar obra"; }
+<a class="back-link" asp-controller="Library" asp-action="Index">← Meu acervo</a>
+<div class="eyebrow">UMA NOVA LEITURA</div><h1>Traga seu texto para o jornal.</h1><p class="lead">Seu arquivo ganha uma nova forma de leitura. As palavras continuam as mesmas.</p>
+<div class="two-panel"><section class="panel"><h2>Importar uma obra</h2><div asp-validation-summary="All" class="validation" role="alert"></div>
+<form asp-action="Upload" method="post" enctype="multipart/form-data" data-upload-form>
+    <label class="upload-zone" for="document"><span class="empty-icon" aria-hidden="true">↑</span><strong>Escolha seu livro ou documento</strong><span>TXT, PDF com texto ou EPUB · até 50 MiB</span><input id="document" type="file" name="file" accept=".txt,.pdf,.epub" required /></label>
+    <p class="hint">Você poderá conferir o texto antes de adicionar ao acervo.</p><button class="button primary" type="submit">Preparar prévia →</button><p class="hint" data-upload-status role="status"></p>
+</form></section>
+<aside class="panel muted-panel"><div class="eyebrow">ANTES DE IMPORTAR</div><h2>Uma leitura fiel ao conteúdo.</h2><ul class="spaced-list"><li><strong>TXT</strong><br />UTF-8 ou UTF-16 com BOM. Parágrafos e pontuação preservados.</li><li><strong>PDF textual</strong><br />Confira a ordem da extração. Digitalizações e arquivos protegidos não são suportados.</li><li><strong>EPUB refluível</strong><br />Sem DRM. Capítulos seguem a ordem do arquivo; imagens são representadas por descrições.</li></ul><p class="hint">O aplicativo não resume, reescreve ou transforma o conteúdo em notícias.</p></aside></div>

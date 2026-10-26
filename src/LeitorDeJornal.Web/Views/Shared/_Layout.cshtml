@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] · Leitor de Jornal</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script src="~/js/site.js" asp-append-version="true" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Pular para o conteúdo</a>
+<header class="site-header">
+    <a class="brand" asp-controller="Library" asp-action="Index"><span class="brand-icon" aria-hidden="true">▤</span><span>Leitor de Jornal<small>SEU TEXTO. UM NOVO RITMO.</small></span></a>
+    <nav aria-label="Principal">
+        <a asp-controller="Library" asp-action="Index">Meu acervo</a>
+        <a asp-controller="Backup" asp-action="Index">Backup</a>
+        <a class="button primary small" asp-controller="Import" asp-action="Index">+ Importar obra</a>
+    </nav>
+</header>
+<main id="main" class="main-container">
+@if (TempData["Message"] is string message) { <div class="notice" role="status">@message</div> }
+@RenderBody()
+</main>
+<footer class="site-footer"><span>Leitor de Jornal <span aria-hidden="true">·</span> Um espaço para ler com calma.</span><span>Texto original, sempre.</span></footer>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

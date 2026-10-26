@@ -1,0 +1,35 @@
+@model Book
+@{ ViewData["Title"] = Model.Title; }
+<div id="reader" data-id="@Model.Id" data-base="@Url.Content("~/Reader")">
+<div class="reader-heading"><a class="back-link" asp-controller="Library" asp-action="Index">← Meu acervo</a><span class="badge">@Model.Format</span><span id="save-status" class="hint" role="status">Preparando leitura…</span></div>
+<h1 class="reader-title">@Model.Title</h1>
+<div class="reader-toolbar" role="group" aria-label="Ferramentas de leitura">
+    <button class="button small" id="open-contents" type="button">☷ Sumário</button>
+    <button class="button small" id="open-search" type="button">Buscar no texto</button>
+    <button class="button small" id="add-bookmark" type="button">☆ Marcar posição</button>
+    <button class="button small" id="open-notes" type="button">Notas e destaques</button>
+    <label>Tema <select id="theme"><option value="paper">Claro</option><option value="sepia">Sépia</option><option value="dark">Escuro</option></select></label>
+    <label>Fonte <input id="font-size" type="number" min="14" max="32" step="2" value="18" aria-label="Tamanho da fonte em pixels" /></label>
+    <label class="checkbox"><input id="accessible" type="checkbox" /> Uma coluna</label>
+</div>
+<div id="reader-error" class="notice warning" role="alert" hidden><span></span><button id="retry-save" class="button small" type="button">Repetir salvamento</button><button class="button small" id="reload-reader" type="button">Recarregar</button></div>
+<div class="mobile-reading-hint">A folha mantém quatro colunas. Deslize horizontalmente ou escolha “Uma coluna” para adaptar à tela.</div>
+<div id="paper-scroll" class="paper-scroll" tabindex="0" aria-label="Folha de leitura, com rolagem horizontal em telas estreitas">
+    <article id="paper" class="paper" aria-label="Texto da obra">
+        <header class="paper-masthead"><span>LEITOR DE JORNAL</span><span id="paper-edition">LEITURA PESSOAL</span></header>
+        <div id="text-window"><div id="reading-text" class="reading-text"></div></div>
+        <footer class="paper-footer"><span>PALAVRAS ORIGINAIS · NOVOS HORIZONTES</span><span id="paper-page"></span></footer>
+    </article>
+</div>
+<div class="pagination"><button id="previous" class="button" type="button">← Anterior</button><div><span id="page-label" aria-live="polite">Preparando páginas…</span><div class="hint" id="progress-label"></div></div><button id="next" class="button" type="button">Próxima →</button></div>
+<p class="hint centered">Use ← → ou Page Up / Page Down para navegar. Selecione um trecho para destacá-lo ou escrever uma nota.</p>
+<div class="selection-actions"><button class="button" id="highlight-selection" type="button">Destacar seleção</button><button class="button" id="note-selection" type="button">Anotar seleção</button></div>
+@* Formulário oculto fornece o token CSRF para os comandos JSON. O texto chega por endpoint JSON. *@
+<form id="csrf-form" method="post">@Html.AntiForgeryToken()</form>
+<dialog id="contents-dialog"><h2>Sumário</h2><p class="hint">PDF: páginas de origem. EPUB: títulos e capítulos. TXT pode não ter sumário.</p><div id="contents-list" class="result-list"></div><button class="button" data-close-dialog type="button">Fechar</button></dialog>
+<dialog id="search-dialog"><h2>Buscar no texto</h2><form id="text-search" class="search-form"><label class="sr-only" for="search-query">Termo ou frase</label><input id="search-query" type="search" maxlength="256" required placeholder="Uma palavra ou frase…" /><button class="button primary" type="submit">Buscar</button></form><p id="search-status" class="hint" role="status"></p><div id="search-results" class="result-list"></div><button class="button" data-close-dialog type="button">Fechar</button></dialog>
+<dialog id="notes-dialog"><h2>Notas e destaques</h2><div id="notes-list" class="result-list"></div><button class="button" data-close-dialog type="button">Fechar</button></dialog>
+<dialog id="edit-note-dialog"><h2 id="note-dialog-title">Anotar trecho</h2><blockquote id="selected-quote"></blockquote><form id="note-form"><label class="field">Nota<textarea id="note-text" rows="5" maxlength="10000"></textarea></label><label class="field">Cor<select id="note-color"><option value="yellow">Amarelo</option><option value="green">Verde</option><option value="pink">Rosa</option></select></label><div class="actions"><button class="button" type="button" data-close-dialog>Cancelar</button><button class="button primary" type="submit">Salvar marcação</button></div><p class="hint" id="note-status" role="status"></p></form></dialog>
+<noscript><div class="notice warning">O leitor paginado precisa de JavaScript. Ative-o para usar busca, marcações e paginação.</div></noscript>
+</div>
+@section Scripts { <script src="~/js/reader.js" asp-append-version="true" defer></script> }

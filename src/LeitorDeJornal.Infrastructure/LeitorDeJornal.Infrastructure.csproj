@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../LeitorDeJornal.Application/LeitorDeJornal.Application.csproj"/>
+    <PackageReference Include="PdfPig" Version="0.1.9"/>
+    <PackageReference Include="AngleSharp" Version="1.1.2"/>
+  </ItemGroup>
+</Project>
