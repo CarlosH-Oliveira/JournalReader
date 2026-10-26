@@ -2,16 +2,18 @@ import http from 'node:http';
 import { spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { Readable } from 'node:stream';
-import { get, put, del, list, issueSignedToken, presignUrl, parseStoreIdFromDelegationToken } from '@vercel/blob';
+import { get, head, put, del, list, issueSignedToken, presignUrl, parseStoreIdFromDelegationToken } from '@vercel/blob';
 
 // SDK oficial em loopback: nenhuma rota administrativa fica exposta ao navegador.
 const secret = randomBytes(32).toString('hex');
 const json = (res, status, value) => { res.writeHead(status, { 'content-type': 'application/json' }); res.end(JSON.stringify(value)); };
+let latestOidc;
 const server = http.createServer(async (req, res) => {
   if (req.headers['x-internal-secret'] !== secret) return json(res, 403, { error: 'Forbidden' });
   const url = new URL(req.url, 'http://localhost');
   const path = url.searchParams.get('path');
-  const auth = req.headers['x-vercel-oidc-token'] ? { oidcToken: req.headers['x-vercel-oidc-token'] } : {};
+  if (req.headers['x-vercel-oidc-token']) latestOidc = req.headers['x-vercel-oidc-token'];
+  const auth = latestOidc ? { oidcToken: latestOidc } : {};
   try {
     if (url.pathname === '/sign' && req.method === 'POST') {
       if (!/^uploads\/[a-f0-9]{32}\/[a-f0-9]{32}\.(epub|pdf|txt)$/.test(path ?? '')) return json(res, 400, { error: 'Invalid path' });
@@ -42,7 +44,10 @@ const server = http.createServer(async (req, res) => {
       const result = await get(path, { access: 'private', useCache: false, ...auth });
       if (!result) return json(res, 404, { error: 'Not found' });
       if (result.statusCode !== 200) return json(res, result.statusCode, { error: 'Read failed' });
-      const headers = { 'content-type': 'application/octet-stream', 'etag': result.blob.etag };
+      const metadata = await head(path, auth);
+      const normalize = value => value.replace(/^W\//, '').replace(/^"|"$/g, '');
+      if (normalize(metadata.etag) !== normalize(result.blob.etag)) { await result.stream.cancel(); return json(res, 409, { error: 'Read conflict' }); }
+      const headers = { 'content-type': 'application/octet-stream', 'x-blob-etag': metadata.etag };
       if (result.blob.size > 0) headers['content-length'] = result.blob.size;
       res.writeHead(200, headers);
       Readable.fromWeb(result.stream).pipe(res); return;
@@ -56,7 +61,7 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'DELETE') { await del(path, auth); return json(res, 200, { ok: true }); }
     return json(res, 405, { error: 'Method not allowed' });
   } catch (error) {
-    const conflict = /Precondition|AlreadyExists|already exists/.test(error.name + ' ' + error.message);
+    const conflict = /precondition|already.?exists/i.test(error.name + ' ' + error.message);
     console.error('Blob operation failed:', error.name, /No blob credentials/.test(error.message) ? 'missing-credentials' : /oidc|token/i.test(error.message) ? 'authentication' : 'storage-error');
     if (!res.headersSent) json(res, conflict ? 412 : 502, { error: conflict ? 'Conflict' : 'Storage unavailable' });
     else res.destroy();

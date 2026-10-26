@@ -59,7 +59,7 @@ public sealed class BlobCatalogStore(BlobBridge bridge) : ICatalogStore
         if (response.StatusCode == HttpStatusCode.NotFound) return (new Catalog(), null);
         response.EnsureSuccessStatusCode();
         var catalog = await response.Content.ReadFromJsonAsync<Catalog>(cancellationToken: ct) ?? throw new InvalidDataException("Acervo vazio.");
-        return (catalog, response.Headers.ETag?.ToString() ?? throw new InvalidDataException("ETag ausente."));
+        return (catalog, response.Headers.TryGetValues("X-Blob-Etag", out var values) ? values.Single() : throw new InvalidDataException("ETag ausente."));
     }
     public async Task<T> ReadAsync<T>(Func<Catalog, T> query, CancellationToken ct = default) => query((await Read(ct)).Catalog);
     public async Task<T> UpdateAsync<T>(Func<Catalog, T> command, CancellationToken ct = default)
