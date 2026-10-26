@@ -2,7 +2,7 @@ import http from 'node:http';
 import { spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { Readable } from 'node:stream';
-import { get, put, del, list, issueSignedToken, presignUrl } from '@vercel/blob';
+import { get, put, del, list, issueSignedToken, presignUrl, parseStoreIdFromDelegationToken } from '@vercel/blob';
 
 // SDK oficial em loopback: nenhuma rota administrativa fica exposta ao navegador.
 const secret = randomBytes(32).toString('hex');
@@ -20,7 +20,10 @@ const server = http.createServer(async (req, res) => {
       const token = await issueSignedToken({ pathname: path, operations: ['put'], validUntil, ...constraints, ...auth });
       const result = await presignUrl(token, { operation: 'put', pathname: path, access: 'private', validUntil,
         ...constraints, addRandomSuffix: false, allowOverwrite: false });
-      return json(res, 200, result);
+      return json(res, 200, { ...result, headers: {
+        'x-api-version': '13', 'x-vercel-blob-access': 'private', 'x-content-type': 'application/octet-stream',
+        'x-vercel-blob-store-id': parseStoreIdFromDelegationToken(token.delegationToken)
+      } });
     }
     if (url.pathname === '/keys' && req.method === 'GET') {
       const keys = []; let cursor;

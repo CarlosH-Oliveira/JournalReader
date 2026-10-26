@@ -29,12 +29,12 @@ public sealed class BlobBridge : IDisposable
         using var result = await client.DeleteAsync("/object?path=" + Uri.EscapeDataString(path), ct);
         result.EnsureSuccessStatusCode();
     }
-    public async Task<string> SignAsync(string path, CancellationToken ct)
+    public async Task<JsonElement> SignAsync(string path, CancellationToken ct)
     {
         using var result = await client.PostAsync("/sign?path=" + Uri.EscapeDataString(path), null, ct);
         result.EnsureSuccessStatusCode();
         var json = await result.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: ct);
-        return json.GetProperty("presignedUrl").GetString()!;
+        return json;
     }
     public async Task<string[]> KeysAsync() => await client.GetFromJsonAsync<string[]>("/keys") ?? [];
     public void Dispose() => client.Dispose();

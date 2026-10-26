@@ -35,8 +35,8 @@ public sealed class ImportController(LibraryService library, IDataProtectionProv
         var bridge = services.GetService<BlobBridge>();
         if (bridge is null) return BadRequest(new { error = "Upload direto indisponível." });
         var path = $"uploads/{Owner()}/{Guid.NewGuid():N}{extension}";
-        var url = await bridge.SignAsync(path, ct);
-        return Json(new { path, uploadUrl = url });
+        var ticket = await bridge.SignAsync(path, ct);
+        return Json(new { path, uploadUrl = ticket.GetProperty("presignedUrl").GetString(), headers = ticket.GetProperty("headers") });
     }
     [HttpPost, RequestSizeLimit(16_384)]
     public async Task<IActionResult> FromBlob(string path, string filename, CancellationToken ct)

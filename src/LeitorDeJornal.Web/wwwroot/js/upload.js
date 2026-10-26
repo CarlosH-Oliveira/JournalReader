@@ -24,9 +24,15 @@ for (const form of document.querySelectorAll('[data-direct-upload="true"]')) {
                 const xhr = new XMLHttpRequest();
                 xhr.open('PUT', uploadUrl.href);
                 xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+                for (const [key, value] of Object.entries(ticket.headers)) xhr.setRequestHeader(key, value);
                 xhr.timeout = 15 * 60 * 1000;
                 xhr.upload.onprogress = e => { if (e.lengthComputable) status.textContent = `Enviando arquivo: ${Math.round(e.loaded / e.total * 100)}%`; };
-                xhr.onload = () => xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error('O armazenamento recusou o arquivo. Tente novamente.'));
+                xhr.onload = () => {
+                    if (xhr.status >= 200 && xhr.status < 300) return resolve();
+                    let code = '';
+                    try { const value = JSON.parse(xhr.responseText)?.error?.code; if (typeof value === 'string' && /^[a-zA-Z_]{1,80}$/.test(value)) code = ` (${value})`; } catch { }
+                    reject(new Error(`O armazenamento recusou o arquivo: HTTP ${xhr.status}${code}. Tente novamente.`));
+                };
                 xhr.onerror = () => reject(new Error('Falha de conexão durante o envio. Tente novamente.'));
                 xhr.ontimeout = () => reject(new Error('O envio demorou demais. Tente novamente.'));
                 xhr.send(file);
