@@ -49,7 +49,7 @@ public sealed class ImportController(LibraryService library, IDataProtectionProv
         {
             using var result = await bridge.ReadAsync(path, ct);
             if (!result.IsSuccessStatusCode) throw new ReaderException("O envio não foi concluído. Selecione o arquivo novamente.");
-            if (result.Content.Headers.ContentLength is not > 0 or > Limits.MaxUpload) throw new ReaderException("Arquivo vazio ou maior que 50 MiB.");
+            if (result.Content.Headers.ContentLength is 0 or > Limits.MaxUpload) throw new ReaderException("Arquivo vazio ou maior que 50 MiB.");
             await using var stream = await result.Content.ReadAsStreamAsync(ct);
             var draft = await library.PreviewAsync(Owner(), filename!, stream, ct);
             return RedirectToAction(nameof(Preview), new { token = draft.Token });

@@ -42,7 +42,9 @@ const server = http.createServer(async (req, res) => {
       const result = await get(path, { access: 'private', useCache: false, ...auth });
       if (!result) return json(res, 404, { error: 'Not found' });
       if (result.statusCode !== 200) return json(res, result.statusCode, { error: 'Read failed' });
-      res.writeHead(200, { 'content-type': 'application/octet-stream', 'etag': result.blob.etag, 'content-length': result.blob.size });
+      const headers = { 'content-type': 'application/octet-stream', 'etag': result.blob.etag };
+      if (result.blob.size > 0) headers['content-length'] = result.blob.size;
+      res.writeHead(200, headers);
       Readable.fromWeb(result.stream).pipe(res); return;
     }
     if (req.method === 'PUT') {
