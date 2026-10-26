@@ -1,0 +1,24 @@
+FROM node:24-bookworm-slim AS blob
+WORKDIR /bridge
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --ignore-scripts
+COPY vercel-gateway/ ./vercel-gateway/
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /source
+COPY Directory.Build.props LeitorDeJornal.sln ./
+COPY src/ ./src/
+RUN dotnet publish src/LeitorDeJornal.Web/LeitorDeJornal.Web.csproj -c Release -o /out
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+COPY --from=build /out ./
+COPY --from=blob /usr/local/bin/node /usr/local/bin/node
+COPY --from=blob /bridge/node_modules ./node_modules/
+COPY --from=blob /bridge/vercel-gateway ./vercel-gateway/
+ENV ASPNETCORE_HTTP_PORTS=80
+ENV ASPNETCORE_ENVIRONMENT=Production
+ENV AllowedHosts="localhost;127.0.0.1;*.vercel.app"
+ENV Storage__Directory=/tmp/journalreader
+EXPOSE 80
+ENTRYPOINT ["node", "vercel-gateway/server.mjs"]
